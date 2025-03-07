@@ -1,0 +1,11 @@
+find_prime: main.o check_prime.o 
+	gcc -o find_prime main.o check_prime.o 
+
+main.o: main.s
+	gcc -c main.s
+
+find_prime.o: check_prime.s
+	gcc -c check_prime.s
+
+clean:
+	rm *.o find_prime
