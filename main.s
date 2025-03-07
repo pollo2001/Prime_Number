@@ -1,68 +1,43 @@
+@main function to call roll_dice, and print, then call count_run and print
 
 .cpu cortex-a72
 .fpu neon-fp-armv8
 
-                    @define data section
-.data
-prompt: .asciz "Enter two positive integers in format: (int1,int2) \n"  @prompt user for int a
-input: .asciz "%d,%d"         @prompt for two int inputs
-output1: .asciz "Prime numbers between %d and "
-output2: .asciz "%d are:\n"
-outputnums: .asciz " %d \n"
+.data	@array in stack not static
 
-                @define text section
 .text
 .align 2
 .global main
-.type main,%function
+.type main, %function
 
-                @main
-main:
+
+main:	@allocate stack memory for array
 
 push {fp,lr}
+add fp,sp,#4
+		@seed srand
+mov r0,#0
+bl time		@sets r0 to current time, occurs once
+bl srand	@seeds srand with r0 value 
 
-ldr r0,=prompt        @ask for inputs
-bl printf
+		@allocate memory for 100 int array, so 100x4bytes= 400 bytes
+mov r0,#100	@immediate should be under 255
+mov r1,#4
+mul r0,r0,r1		@100x4bytes = 400 bytes
+sub sp,sp,r0		@stack pointer allocates 400 byte block of stack
 
-ldr r0,=input        @arrange pointer for first int, then second int
-sub sp,sp,#4           @ points to first %d address
-mov r1,sp               @ r1 = first %d
+str sp,[fp,#-8]		@*fp(fp-8)=sp, offset fp address, to point at array block
 
-sub sp,sp,#4
-mov r2,sp               @r2 = second %d
-bl scanf
+ldr r0,[fp,#-8]		@generate the roll_dice function , where r0 holds array[100]
+bl roll_dice
 
-ldr r5,[sp,#4]        @user integer: n1 is in r5
-ldr r6,[sp]        @user integer : n2 is r6
 
-ldr r0,=output1        @print output1
-mov r1,r5
-bl printf
+@@@@print array
 
-ldr r0,=output2        @print output2
-mov r1,r6
-bl printf
+			@generate the count_run function, takes in roll_dices returned array[100] 
+ldr r0,[fp,#-8]		@ r0 = *(fp-8), runs off r0 holding the altered array[100]
+bl count_run
 
-add r10,r5,#1        @set loop initial i at, i=n1+1
-
-forloop:
-cmp r10,r6        @check if i<n2
-bge end_forloop        @if greater than or equal, end loop
-bl check_prime
-
-cmp r4,#1
-beq printer     @jump to printer
-add r10,r10,#1
-b forloop
-
-printer:
-ldr r0,=outputnums
-mov r1,r10
-bl printf
-
-add r10,r10,#1
-b forloop
-end_forloop:
-
+sub sp,fp,#4
 pop {fp,pc}
 bx lr

@@ -1,5 +1,7 @@
-play_dice: main.o count_run.o roll_dice.o mod.o
-	gcc -o play_dice main.o count_run.o roll_dice.o mod.o
+@makefile to run program
+
+mymod: main.o count_run.o roll_dice.o mod.o
+	gcc -o mymod main.o count_run.o roll_dice.o
 
 main.o: main.s
 	gcc -c main.s
@@ -14,4 +16,4 @@ mod.o: mod.s
 	gcc -c mod.s
 
 clean:
-	rm *.o play_dice
+	rm *.o
